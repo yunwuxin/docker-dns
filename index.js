@@ -47,7 +47,6 @@ server.on('error', function (err) {
 });
 
 server.on('message', function (message, rinfo) {
-  var nameserver = opts.nameservers[0];
   var returner = false;
 
   var query = packet.parse(message);
@@ -95,19 +94,21 @@ server.on('message', function (message, rinfo) {
   if (returner) {
     return
   }
+  
+  var nameserver = opts.nameservers[0];
 
   Object.keys(opts.servers).forEach(function (s) {
     if (domain.indexOf(s) !== -1) {
       nameserver = opts.servers[s]
     }
   })
-
+  
   var fallback
   (function queryns (message, nameserver) {
     var sock = dgram.createSocket('udp4')
     sock.send(message, 0, message.length, 53, nameserver, function () {
       fallback = setTimeout(function () {
-        queryns(message, opts.nameservers[0])
+        queryns(message, opts.nameservers[1])
       }, opts.fallback_timeout)
     })
     sock.on('error', function (err) {
