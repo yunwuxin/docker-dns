@@ -33,7 +33,7 @@ var logdebug = require('debug')('dnsproxy:debug');
 var logquery = require('debug')('dnsproxy:query');
 var logerror = require('debug')('dnsproxy:error');
 
-var cache = require('cache');
+var cache = new require('cache')(60 * 60 * 1000);
 
 logdebug('options: %j', opts);
 
@@ -128,7 +128,7 @@ server.on('message', function (message, rinfo) {
       logquery('type: primary, nameserver: %s, query: %s, type: %s, answer: %s', nameserver, domain, util.records[type] || 'unknown:' + type, util.listAnswer(response))
       server.send(response, 0, response.length, rinfo.port, rinfo.address)
       //写入cache
-      cache.set(domain + ':' + type) = response;
+      cache.put(domain + ':' + type, response);
       sock.close()
     })
   }(message, nameserver))

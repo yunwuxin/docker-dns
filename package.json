@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/delta1186/docker-dns#readme",
   "dependencies": {
+    "cache": "^3.0.0",
     "debug": "2.3.3",
     "native-dns-packet": "0.1.1",
     "rc": "1.1.6"
