@@ -1,4 +1,4 @@
-FROM mhart/alpine-node
+FROM node:lts-alpine
 
 ENV NODE_ENV=production
 EXPOSE 53/udp
