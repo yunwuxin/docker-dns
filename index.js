@@ -33,7 +33,7 @@ var logdebug = require('debug')('dnsproxy:debug');
 var logquery = require('debug')('dnsproxy:query');
 var logerror = require('debug')('dnsproxy:error');
 
-var cache = new require('cache')(60 * 60 * 1000);
+var cache = new (require('cache'))(60 * 60 * 1000);
 
 logdebug('options: %j', opts);
 
