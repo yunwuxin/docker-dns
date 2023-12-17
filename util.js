@@ -26,9 +26,9 @@ module.exports.createAnswer = function (query, answer) {
   query.header.ra = 1
   query.answer.push({ name: query.question[0].name, type: 1, class: 1, ttl: 30, address: answer })
 
-  var buf = new Buffer(4096)
+  var buf = Buffer.from(4096)
   var wrt = packet.write(buf, query)
-  var res = buf.slice(0, wrt)
+  var res = buf.subarray(0, wrt)
 
   return res
 }

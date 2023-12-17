@@ -97,17 +97,10 @@ server.on('message', function (message, rinfo) {
     return
   }
 
-  Object.keys(cache).forEach(function (h) {
-    if (domain === h) {
-      var response = cache[h];
-      logquery('type: cache, query: %s, type: %s, answer: %s', domain, util.records[type] || 'unknown', util.listAnswer(response))
-      server.send(response, 0, response.length, rinfo.port, rinfo.address);
-
-      returner = true;
-    }
-  });
-
-  if (returner) {
+  var cached = cache[domain + ':' + type];
+  if (cached) {
+    logquery('type: cache, query: %s, type: %s, answer: %s', domain, util.records[type] || 'unknown:' + type, util.listAnswer(cached))
+    server.send(cached, 0, cached.length, rinfo.port, rinfo.address);
     return;
   }
 
@@ -132,8 +125,10 @@ server.on('message', function (message, rinfo) {
     })
     sock.on('message', function (response) {
       clearTimeout(fallback)
-      logquery('type: primary, nameserver: %s, query: %s, type: %s, answer: %s', nameserver, domain, util.records[type] || 'unknown', util.listAnswer(response))
+      logquery('type: primary, nameserver: %s, query: %s, type: %s, answer: %s', nameserver, domain, util.records[type] || 'unknown:' + type, util.listAnswer(response))
       server.send(response, 0, response.length, rinfo.port, rinfo.address)
+      //写入cache
+      cache[domain + ':' + type] = response;
       sock.close()
     })
   }(message, nameserver))
