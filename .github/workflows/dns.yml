@@ -1,9 +1,6 @@
 name: dns
 on:
   push:
-    paths:
-      - '.github/workflows/dns.yml'
-      - 'Dockerfile'
 
 jobs:
   build:
