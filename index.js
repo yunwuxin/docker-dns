@@ -33,6 +33,8 @@ var logdebug = require('debug')('dnsproxy:debug');
 var logquery = require('debug')('dnsproxy:query');
 var logerror = require('debug')('dnsproxy:error');
 
+var cache = {};
+
 logdebug('options: %j', opts);
 
 var server = dgram.createSocket('udp4');
@@ -94,7 +96,21 @@ server.on('message', function (message, rinfo) {
   if (returner) {
     return
   }
-  
+
+  Object.keys(cache).forEach(function (h) {
+    if (domain === h) {
+      var response = cache[h];
+      logquery('type: cache, query: %s, type: %s, answer: %s', domain, util.records[type] || 'unknown', util.listAnswer(response))
+      server.send(response, 0, response.length, rinfo.port, rinfo.address);
+
+      returner = true;
+    }
+  });
+
+  if (returner) {
+    return;
+  }
+
   var nameserver = opts.nameservers[0];
 
   Object.keys(opts.servers).forEach(function (s) {
@@ -102,9 +118,9 @@ server.on('message', function (message, rinfo) {
       nameserver = opts.servers[s]
     }
   })
-  
+
   var fallback
-  (function queryns (message, nameserver) {
+  (function queryns(message, nameserver) {
     var sock = dgram.createSocket('udp4')
     sock.send(message, 0, message.length, 53, nameserver, function () {
       fallback = setTimeout(function () {
@@ -113,7 +129,6 @@ server.on('message', function (message, rinfo) {
     })
     sock.on('error', function (err) {
       logerror('Socket Error: %s', err)
-      process.exit(5)
     })
     sock.on('message', function (response) {
       clearTimeout(fallback)
